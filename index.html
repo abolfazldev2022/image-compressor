@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>فشرده‌ساز تصویر آفلاین</title>
+<!-- Optional web font: purely a progressive enhancement. If there is no internet
+     connection this simply fails silently and the CSS fallback stack (Tahoma /
+     Segoe UI / system sans) is used instead — the app keeps working offline. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- ===== Header ===== -->
+    <header class="app-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="30" height="30">
+            <rect x="6" y="10" width="36" height="28" rx="4" fill="none" stroke="currentColor" stroke-width="3"/>
+            <circle cx="16" cy="20" r="3.4" fill="currentColor"/>
+            <path d="M10 33 L20 23 L27 30 L33 24 L40 31" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <div class="brand-text">
+          <h1>فشرده‌ساز تصویر</h1>
+          <p>ابزار محلی و آفلاین کاهش حجم تصویر</p>
+        </div>
+      </div>
+      <div class="privacy-pill" id="privacyNotice">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9 8 11 4.6-2 8-6 8-11V5l-8-3Z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span>تصاویر شما از دستگاه خارج نمی‌شوند و تمام عملیات به‌صورت محلی در مرورگر انجام می‌شود.</span>
+      </div>
+    </header>
+
+    <main class="app-main">
+
+      <!-- ===== Upload Zone ===== -->
+      <section class="panel upload-panel" id="uploadPanel">
+        <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="انتخاب یا رها کردن تصویر">
+          <svg viewBox="0 0 64 64" width="46" height="46" class="dz-icon" aria-hidden="true">
+            <path d="M32 42V14M32 14l-10 10M32 14l10 10" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 42v6a4 4 0 0 0 4 4h28a4 4 0 0 0 4-4v-6" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <p class="dz-title">تصویر را اینجا رها کنید</p>
+          <p class="dz-sub">یا برای انتخاب فایل کلیک کنید — JPG، PNG یا WebP</p>
+          <button type="button" class="btn btn-primary" id="pickFileBtn">انتخاب تصویر از سیستم</button>
+          <input type="file" id="fileInput" accept="image/jpeg,image/png,image/webp,image/jpg" hidden />
+        </div>
+        <p class="error-msg" id="errorMsg" hidden></p>
+      </section>
+
+      <!-- ===== Workspace (hidden until an image is loaded) ===== -->
+      <section class="workspace" id="workspace" hidden>
+
+        <!-- Controls -->
+        <div class="panel controls-panel">
+          <h2 class="panel-title">تنظیمات فشرده‌سازی</h2>
+
+          <div class="presets">
+            <button type="button" class="preset-chip" data-preset="small">
+              <strong>کم‌حجم</strong>
+              <span>مناسب ارسال در سایت‌ها</span>
+            </button>
+            <button type="button" class="preset-chip is-active" data-preset="balanced">
+              <strong>متعادل</strong>
+              <span>کیفیت و حجم متعادل</span>
+            </button>
+            <button type="button" class="preset-chip" data-preset="high">
+              <strong>کیفیت بالا</strong>
+              <span>کاهش حجم کمتر</span>
+            </button>
+          </div>
+
+          <div class="field">
+            <div class="field-label-row">
+              <label for="qualityRange">کیفیت تصویر</label>
+              <output id="qualityValue">75٪</output>
+            </div>
+            <input type="range" id="qualityRange" min="10" max="100" step="1" value="75" />
+            <p class="field-hint" id="pngHint" hidden>توجه: فرمت PNG بدون افت کیفیت (Lossless) است و این کشویی تأثیر محدودی روی حجم خروجی آن دارد.</p>
+          </div>
+
+          <div class="field">
+            <label for="formatSelect">فرمت خروجی</label>
+            <select id="formatSelect">
+              <option value="image/jpeg">JPEG</option>
+              <option value="image/webp">WebP</option>
+              <option value="image/png">PNG</option>
+            </select>
+          </div>
+
+          <div class="field field-row">
+            <div class="field-col">
+              <label for="maxWidth">حداکثر عرض (پیکسل)</label>
+              <input type="number" id="maxWidth" min="1" placeholder="مثلاً 1920" />
+            </div>
+            <div class="field-col">
+              <label for="maxHeight">حداکثر ارتفاع (پیکسل)</label>
+              <input type="number" id="maxHeight" min="1" placeholder="مثلاً 1080" />
+            </div>
+          </div>
+
+          <label class="checkbox-row">
+            <input type="checkbox" id="keepAspect" checked />
+            <span>حفظ نسبت تصویر</span>
+          </label>
+
+          <div class="actions">
+            <button type="button" class="btn btn-primary btn-block" id="compressBtn">فشرده‌سازی تصویر</button>
+            <button type="button" class="btn btn-ghost btn-block" id="resetBtn">شروع دوباره</button>
+          </div>
+
+          <p class="warning-msg" id="warningMsg" hidden></p>
+        </div>
+
+        <!-- Previews -->
+        <div class="panel preview-panel">
+          <h2 class="panel-title">پیش‌نمایش</h2>
+
+          <div class="preview-grid">
+            <div class="preview-card">
+              <h3>تصویر اصلی</h3>
+              <div class="preview-frame">
+                <img id="originalImg" alt="پیش‌نمایش تصویر اصلی" />
+              </div>
+              <dl class="stat-list">
+                <div><dt>حجم</dt><dd id="origSize">—</dd></div>
+                <div><dt>ابعاد</dt><dd id="origDims">—</dd></div>
+              </dl>
+            </div>
+
+            <div class="preview-card">
+              <h3>تصویر فشرده‌شده</h3>
+              <div class="preview-frame" id="compressedFrame">
+                <div class="placeholder" id="compressedPlaceholder">
+                  <div class="spinner" id="spinner" hidden></div>
+                  <span id="placeholderText">برای شروع، دکمهٔ «فشرده‌سازی تصویر» را بزنید</span>
+                </div>
+                <img id="compressedImg" alt="پیش‌نمایش تصویر فشرده‌شده" hidden />
+              </div>
+              <dl class="stat-list">
+                <div><dt>حجم</dt><dd id="compSize">—</dd></div>
+                <div><dt>ابعاد</dt><dd id="compDims">—</dd></div>
+                <div><dt>فرمت</dt><dd id="compFormat">—</dd></div>
+              </dl>
+            </div>
+          </div>
+
+          <!-- Signature element: compression meter -->
+          <div class="meter-block" id="meterBlock" hidden>
+            <div class="meter-header">
+              <span>میزان کاهش حجم</span>
+              <span class="meter-percent" id="meterPercent">۰٪</span>
+            </div>
+            <div class="meter-track">
+              <div class="meter-fill" id="meterFill"></div>
+            </div>
+          </div>
+
+          <button type="button" class="btn btn-success btn-block" id="downloadBtn" hidden>دانلود تصویر فشرده‌شده</button>
+        </div>
+
+      </section>
+
+    </main>
+
+    <footer class="app-footer">
+      <p>ساخته‌شده برای استفادهٔ شخصی و آفلاین — بدون سرور، بدون آپلود</p>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
